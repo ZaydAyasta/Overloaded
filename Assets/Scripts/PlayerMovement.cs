@@ -43,7 +43,7 @@ public class PlayerMovement : MonoBehaviour
         //anim.SetFloat("Speed", Mathf.Abs(movX) + Mathf.Abs(movY));
 
         if (movX != 0)
-            sr.flipX = movX > 0;
+            sr.flipX = movX < 0;
     }
 
     void OnTriggerEnter2D(Collider2D other)
