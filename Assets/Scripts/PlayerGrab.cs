@@ -28,27 +28,44 @@ public class PlayerGrab : MonoBehaviour
     }
 
     void Update()
+{
+    if (Input.GetKeyDown(grabKey))
     {
-        if (Input.GetKeyDown(grabKey))
-        {
-            if (carriedT == null) TryGrab();
-            else Drop();
-        }
-
-        // Si estamos llevando por offset, mantener la posición cada frame
-        if (carriedT != null && carriedG != null)
-        {
-            float sign = (carriedG.mirrorOffsetWithPlayerFlip && sr != null && sr.flipX) ? -1f : 1f;
-            Vector3 p = transform.position;
-            Vector2 off = carriedG.carryOffset;
-
-            carriedT.position = new Vector3(
-                p.x + off.x * sign,
-                p.y + off.y,
-                carriedT.position.z
-            );
-        }
+        if (carriedT == null) TryGrab();
+        else Drop();
     }
+
+    // Si estamos llevando algo, actualizar su posición y flip visual
+    if (carriedT != null && carriedG != null)
+    {
+        float sign = (carriedG.mirrorOffsetWithPlayerFlip && sr != null && sr.flipX) ? -1f : 1f;
+        Vector3 p = transform.position;
+        Vector2 off = carriedG.carryOffset;
+
+        carriedT.position = new Vector3(
+            p.x + off.x * sign,
+            p.y + off.y,
+            carriedT.position.z
+        );
+
+        // 🔁 VOLTEAR EL SPRITE SI EL PLAYER SE DA VUELTA
+        var objSprite = carriedT.GetComponent<SpriteRenderer>();
+        if (objSprite != null)
+            objSprite.flipX = sr.flipX;  // mismo flip que el jugador
+    }
+
+    if (carriedT != null && carriedG != null)
+{
+    var behaviour = carriedT.GetComponent<GrabbableBehaviour>();
+    if (behaviour != null)
+    {
+        // Le pasamos el movimiento actual (solo horizontal, si quieres)
+        Vector2 moveInput = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
+        behaviour.OnCarriedUpdate(this, moveInput);
+    }
+}
+}
+
 
     // ---------- AGARRAR ----------
     void TryGrab()
@@ -139,5 +156,21 @@ public class PlayerGrab : MonoBehaviour
 
         Gizmos.color = c;
         Gizmos.DrawWireCube(grabBox.bounds.center, grabBox.bounds.size);
+    }
+
+    public string CurrentGrabbedName
+    {
+        get
+        {
+            if (carriedT != null)
+                return carriedT.name;
+            else
+                return null;
+        }
+    }
+
+    public bool IsCarryingSomething
+    {
+        get { return carriedT != null; }
     }
 }
