@@ -6,7 +6,7 @@ using UnityEngine;
 public class PlayerMovement : MonoBehaviour
 {
     [Header("Movimiento")]
-    public float velocidad = 5f;
+    public float velocidad = 5.5f;
     public float velocidadEscalera = 3f;
 
     private Animator anim;
@@ -31,31 +31,32 @@ public class PlayerMovement : MonoBehaviour
 
         if (enEscalera)
         {
-            // Desactivar gravedad temporalmente mientras se escala
             rb.gravityScale = 0f;
             rb.linearVelocity = new Vector2(movX * velocidad, movY * velocidadEscalera);
         }
         else
         {
-            rb.gravityScale = 2f; // o el valor que uses normalmente
+            rb.gravityScale = 2f;
             rb.linearVelocity = new Vector2(movX * velocidad, rb.linearVelocity.y);
         }
 
-        anim.SetFloat("Speed", Mathf.Abs(movX) + Mathf.Abs(movY));
+        //anim.SetFloat("Speed", Mathf.Abs(movX) + Mathf.Abs(movY));
 
         if (movX != 0)
-            sr.flipX = movX < 0;
+            sr.flipX = movX > 0;
     }
 
     void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("Escalera"))
+            Debug.Log("TOY EN ESCALERA", gameObject);
             enEscalera = true;
     }
 
     void OnTriggerExit2D(Collider2D other)
     {
         if (other.CompareTag("Escalera"))
+            Debug.Log("TOY SALIENDO DE ESCALERA", gameObject);
             enEscalera = false;
     }
 }
