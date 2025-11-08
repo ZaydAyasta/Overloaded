@@ -6,8 +6,8 @@ using UnityEngine;
 public class PlayerMovement : MonoBehaviour
 {
     [Header("Movimiento")]
-    public float velocidad = 5.5f;
-    public float velocidadEscalera = 3f;
+    public float velocidad = 10f;
+    public float velocidadEscalera = 4f;
 
     private Animator anim;
     private SpriteRenderer sr;
@@ -16,6 +16,7 @@ public class PlayerMovement : MonoBehaviour
     private float movX;
     private float movY;
     private bool enEscalera;
+    public Collider2D pisoSuperiorCollider;
 
     void Awake()
     {
@@ -32,7 +33,15 @@ public class PlayerMovement : MonoBehaviour
         if (enEscalera)
         {
             rb.gravityScale = 0f;
-            rb.linearVelocity = new Vector2(movX * velocidad, movY * velocidadEscalera);
+
+            rb.linearVelocity = new Vector2(0f, movY * velocidadEscalera);
+
+            if (movY == 0 && Mathf.Abs(movX) > 0.1f)
+            {
+                rb.linearVelocity = new Vector2(movX * velocidad, 0f);
+                enEscalera = false;
+                pisoSuperiorCollider.enabled = true;
+            }
         }
         else
         {
@@ -40,24 +49,24 @@ public class PlayerMovement : MonoBehaviour
             rb.linearVelocity = new Vector2(movX * velocidad, rb.linearVelocity.y);
         }
 
-        //anim.SetFloat("Speed", Mathf.Abs(movX) + Mathf.Abs(movY));
-
         if (movX != 0)
             sr.flipX = movX < 0;
     }
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.CompareTag("Escalera")) { 
-            Debug.Log("TOY EN ESCALERA", gameObject);
+        if (other.CompareTag("Escalera"))
+        {
+            pisoSuperiorCollider.enabled = false;
             enEscalera = true;
         }
     }
 
     void OnTriggerExit2D(Collider2D other)
     {
-        if (other.CompareTag("Escalera")) { 
-            Debug.Log("TOY SALIENDO DE ESCALERA", gameObject);
+        if (other.CompareTag("Escalera"))
+        {
+            pisoSuperiorCollider.enabled = true;
             enEscalera = false;
         }
     }
