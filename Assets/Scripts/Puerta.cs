@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class Puerta : MonoBehaviour
 {
-    [SerializeField] KeyCode _key = KeyCode.G;
+    [SerializeField] KeyCode _key = KeyCode.W;
     [SerializeField] Transform _transform; // destino
 
     Transform _player;
@@ -24,7 +24,8 @@ public class Puerta : MonoBehaviour
         if (_indoor && Input.GetKeyDown(_key))
         {
             _indoor = false;        
-            anim.CrossFade("puerta", 0.01f);   
+            anim.CrossFade("puerta", 0.01f);
+            EnterDoor();
         }
     }
 
