@@ -27,6 +27,8 @@ public class UI_Tareas : MonoBehaviour
     private List<Toggle> toggles = new List<Toggle>();
     private System.Random rng = new System.Random();
 
+    [SerializeField] GameObject _prefab;
+
     void Start()
     {
         GenerarListaAleatoria(cantidadInicial);
@@ -99,6 +101,8 @@ public class UI_Tareas : MonoBehaviour
             label.fontStyle = FontStyles.Normal;
             label.color = Color.white;
         }
+
+        CheckWinCondition();
     }
 
     public void CompletarTarea(int index)
@@ -106,6 +110,8 @@ public class UI_Tareas : MonoBehaviour
         if (index < 0 || index >= toggles.Count) return;
         toggles[index].isOn = true;
     }
+
+
 
     public void CompletarTareaPorTexto(string texto)
     {
@@ -129,4 +135,25 @@ public class UI_Tareas : MonoBehaviour
 
         toggles.Clear();
     }
+
+
+    private void CheckWinCondition()
+    {
+        
+        foreach (var tog in toggles)
+        {
+            if (!tog.isOn)
+                return; // Todavía falta una tarea
+        }
+
+
+        GameObject g =Instantiate(_prefab);
+
+        g.GetComponent<Animator>().CrossFade("Win", 0.01f);
+    }
+
+
+
+
+
 }
