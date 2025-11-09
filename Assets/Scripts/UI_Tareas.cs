@@ -41,7 +41,7 @@ public class UI_Tareas : MonoBehaviour
         //float offsetY = -210f;
         //float separacion = 30f;
 
-        for (int i = 0; i < cantidad && disponibles.Count > 0; i++)
+        for (int i = 0; i < cantidad; i++)
         {
             int idx = rng.Next(disponibles.Count);
             string texto = disponibles[idx];
