@@ -34,6 +34,7 @@ public class Puerta : MonoBehaviour
         {
             _indoor = true;
             _play._isInDoor = true;
+            anim.CrossFade("LockDoor", 0.01f);
             Debug.Log("in");
         }
     }
@@ -49,5 +50,5 @@ public class Puerta : MonoBehaviour
     }
 
     public bool GetContact() { return _indoor; }
-    public void EnterDoor() { _player.position = _transform.position; anim.CrossFade("LockDoor", 0.01f); }
+    public void EnterDoor() { _player.position = _transform.position; }
 }
