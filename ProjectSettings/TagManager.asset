@@ -6,6 +6,8 @@ TagManager:
   tags:
   - Escalera
   - Grabbable
+  - Polvo
+  - Polvo Piso
   layers:
   - Default
   - TransparentFX
