@@ -11,8 +11,7 @@ public abstract class InteractAtumaticTask : MonoBehaviour
     private bool isInteracting = false;
     private ProgressBarTask bar;
     private PlayerGrab player;
-    [SerializeField]ScriptReference a;
-
+    private bool _finishTask = false;
     private void Awake()
     {
         StartComponents();
@@ -25,6 +24,7 @@ public abstract class InteractAtumaticTask : MonoBehaviour
 
     void Update()
     {
+        if (_finishTask) return;
         if (!PlayerNear()) return;
         if (player.IsCarryingSomething) return; 
 
@@ -78,6 +78,7 @@ public abstract class InteractAtumaticTask : MonoBehaviour
     public virtual void OnCompleted()
     {
         StopInteraction();
+        _finishTask = true;
 
     }
     public virtual void StartComponents()

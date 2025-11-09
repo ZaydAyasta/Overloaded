@@ -31,6 +31,10 @@ public class SpongeBehaviour : GrabbableBehaviour
     private bool nearWindow = false;
     private bool isCleaning = false;
 
+    [SerializeField] private ParticleSystem polvoParticle;
+    private bool polvoDentro = false;
+    Transform _particlePolvo;
+
     public override bool WantsToBlockDrop() => nearWindow || isCleaning;
     public override string GetDropBlockHint() =>
         (nearWindow || isCleaning) ? "No puedes soltar mientras limpias la ventana." : null;
@@ -43,6 +47,10 @@ public class SpongeBehaviour : GrabbableBehaviour
             wipeAreaTrigger.isTrigger = true;
             wipeAreaTrigger.enabled  = true; // SIEMPRE activo para detectar
         }
+
+        if (polvoParticle != null) _particlePolvo = polvoParticle.transform;
+
+        SafeParticle(p => { if (p.isPlaying) p.Stop(); });
     }
 
     public override void OnPickedUp(PlayerGrab player)
@@ -80,6 +88,7 @@ public class SpongeBehaviour : GrabbableBehaviour
         else
         {
             angle = Mathf.Lerp(angle, 0f, Time.deltaTime * smooth);
+            polvoDentro = false;
         }
         self.localRotation = Quaternion.Euler(0f, 0f, angle);
 
@@ -90,11 +99,21 @@ public class SpongeBehaviour : GrabbableBehaviour
             for (int i = 0; i < windows.Length; i++)
                 windows[i]?.ApplyScrub(amount);
 
+            polvoDentro = true;
+           
+            if (polvoDentro)
+            {
+                SafeParticle(p => { if (!p.isPlaying) p.Play(); });
+            }
+                
+            
+
             PlayFx();
         }
         else
         {
             StopFx();
+            SafeParticle(p => { if (p.isPlaying) p.Stop(); });
         }
     }
 
@@ -119,9 +138,11 @@ public class SpongeBehaviour : GrabbableBehaviour
             var c = hits[i];
             if (!c) continue;
             var w = c.GetComponent<WindowPanel>() ?? c.GetComponentInParent<WindowPanel>();
-            if (w != null && !list.Contains(w)) list.Add(w);
+            if (w != null && !list.Contains(w)) { list.Add(w); _particlePolvo.position = c.transform.position; }
         }
         return list.ToArray();
+
+        
     }
 
     private void PlayFx()
@@ -134,5 +155,11 @@ public class SpongeBehaviour : GrabbableBehaviour
     {
         if (scrubFx != null && scrubFx.isPlaying) scrubFx.Stop();
         if (scrubSfx != null && scrubSfx.isPlaying) scrubSfx.Stop();
+    }
+
+    void SafeParticle(System.Action<ParticleSystem> action)
+    {
+        if (polvoParticle == null || polvoParticle.Equals(null)) return;
+        action(polvoParticle);
     }
 }
