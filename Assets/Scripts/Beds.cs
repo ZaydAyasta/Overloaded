@@ -46,7 +46,7 @@ public class Beds : InteractAtumaticTask
         }
 
 
-        _task = GetComponent<InteractAtumaticTask>();
+        //_task = GetComponent<InteractAtumaticTask>();
 
         if (manager == null) manager = FindFirstObjectByType<BedsManager>();
         manager?.RegisterBed(this);
