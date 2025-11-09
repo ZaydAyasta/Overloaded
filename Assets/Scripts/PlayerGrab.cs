@@ -14,6 +14,9 @@ public class PlayerGrab : MonoBehaviour
     [Header("Control")]
     public KeyCode grabKey = KeyCode.E;
 
+    private Animator anim;
+    private bool isCarrying;
+
     // Estado actual
     private Transform carriedT;
     private Rigidbody2D carriedRb;
@@ -23,6 +26,7 @@ public class PlayerGrab : MonoBehaviour
     void Awake()
     {
         sr = GetComponent<SpriteRenderer>();
+        anim = GetComponent<Animator>(); 
         if (grabBox == null)
             Debug.LogWarning("PlayerGrab: asigna un BoxCollider2D a 'grabBox'.");
     }
@@ -116,6 +120,10 @@ public class PlayerGrab : MonoBehaviour
         Vector3 p2 = transform.position;
         Vector2 off2 = carriedG.carryOffset;
         carriedT.position = new Vector3(p2.x + off2.x * sign, p2.y + off2.y, carriedT.position.z);
+
+        isCarrying = true;
+        if (anim != null)
+            anim.SetBool("IsCarrying", true);
     }
 
     // ---------- SOLTAR ----------
@@ -132,6 +140,10 @@ public class PlayerGrab : MonoBehaviour
         carriedT  = null;
         carriedRb = null;
         carriedG  = null;
+
+        isCarrying = false;
+        if (anim != null)
+            anim.SetBool("IsCarrying", false);
     }
 
     // ---------- Gizmo: la caja se pinta cian (verde si hay algo Grabbable dentro) ----------
