@@ -149,11 +149,14 @@ public class UI_Tareas : MonoBehaviour
 
         GameObject g =Instantiate(_prefab);
 
-        pantalla a = g.GetComponent<pantalla>();
-
-        a.win();
-
        
+
+
+        g.GetComponent<Pantalla>().win();
+
+        
+
+
     }
 
 

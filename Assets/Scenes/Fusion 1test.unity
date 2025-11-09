@@ -4209,7 +4209,7 @@ MonoBehaviour:
   - Limpiar mesa
   - Ordenar la cama
   - Tender la ropa
-  _prefab: {fileID: 5083883147555272419, guid: a15276289f5bf6a44849d05cf2474e23, type: 3}
+  _prefab: {fileID: 796940728737532057, guid: ef92bf4b3fbfe114ba5d33b432ddfe2f, type: 3}
 --- !u!4 &746146012
 Transform:
   m_ObjectHideFlags: 0

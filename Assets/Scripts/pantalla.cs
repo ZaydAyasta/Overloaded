@@ -1,17 +1,30 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.SceneManagement;
-public class pantalla : MonoBehaviour
+public class Pantalla : MonoBehaviour
 {
-    Animator ani;
-    void Start()
+    public Animator ani;
+
+    void Awake()
     {
-        ani = GetComponent<Animator>();
+        // Buscar aunque esté en hijos
+        if (ani == null)
+            ani = GetComponentInChildren<Animator>();
     }
 
-    // Update is called once per frame
+    public void win()
+    {
+        if (ani == null)      return;
+        
 
-    public void win() => ani.CrossFade("Win", 0.01f);
-    public void lose() => ani.CrossFade("lose", 0.01f);
+        ani.CrossFade("WinNew", 0.01f);
+    }
+
+    public void lose()
+    {
+        if (ani == null) return;
+
+        ani.CrossFade("LoseNew", 0.01f);
+    }
 
     public void restart() => SceneManager.LoadScene("escena");
 }
