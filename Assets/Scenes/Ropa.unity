@@ -2148,7 +2148,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_Sprite: {fileID: -7985085695153486568, guid: 3c20f965d840a884eb631bbff3ed16ef, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -3465,6 +3465,7 @@ MonoBehaviour:
   cleanPerSecond: 1.6
   scrubFx: {fileID: 0}
   scrubSfx: {fileID: 0}
+  polvoParticle: {fileID: 0}
 --- !u!1 &772370658
 GameObject:
   m_ObjectHideFlags: 0
