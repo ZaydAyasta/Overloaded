@@ -10,7 +10,7 @@ public class UI_Tareas : MonoBehaviour
     public Transform contenedorTareas;
 
     [Header("Settings")]
-    public int cantidadInicial = 5;
+    public int cantidadInicial = 6;
     [TextArea]
     public List<string> poolTareas = new List<string>()
     {
@@ -18,6 +18,7 @@ public class UI_Tareas : MonoBehaviour
         "Limpiar ventanas",
         "Regar plantas",
         "Sacar la basura",
+        "Encender luces",
         "Hacer la cena",
         "Hervir agua",
         "Lavar ropa",
