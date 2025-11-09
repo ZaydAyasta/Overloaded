@@ -178,7 +178,7 @@ MonoBehaviour:
   cleanedParam: Cleaned
   useTrigger: 0
   flashDuration: 0.15
-  flashColor: {r: 1, g: 0.78036785, b: 0, a: 1}
+  flashColor: {r: 0, g: 1, b: 0.25335073, a: 1}
   manager: {fileID: 456471207}
 --- !u!61 &4842566
 BoxCollider2D:
@@ -951,7 +951,7 @@ MonoBehaviour:
   cleanedParam: Cleaned
   useTrigger: 0
   flashDuration: 0.15
-  flashColor: {r: 1, g: 1, b: 1, a: 1}
+  flashColor: {r: 0, g: 1, b: 0.21316147, a: 1}
   manager: {fileID: 456471207}
 --- !u!61 &345222963
 BoxCollider2D:
@@ -3554,7 +3554,6 @@ MonoBehaviour:
   - Limpiar mesa
   - Ordenar la cama
   - Tender la ropa
-  - Hervir agua
 --- !u!4 &746146012
 Transform:
   m_ObjectHideFlags: 0
@@ -11611,7 +11610,7 @@ MonoBehaviour:
   cleanedParam: Cleaned
   useTrigger: 0
   flashDuration: 0.15
-  flashColor: {r: 1, g: 1, b: 1, a: 1}
+  flashColor: {r: 0, g: 1, b: 0.25335073, a: 1}
   manager: {fileID: 456471207}
 --- !u!61 &1419187794
 BoxCollider2D:
