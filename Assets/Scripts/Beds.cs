@@ -58,6 +58,11 @@ public class Beds : MonoBehaviour
         _player = FindFirstObjectByType<PlayerGrab>();
     }
 
+    private void Update()
+    {
+        MakeBed();
+    }
+
     void MakeBed()
     {
         bool _keyTask = Input.GetKey(_key);
@@ -68,8 +73,9 @@ public class Beds : MonoBehaviour
         if (_keyTask && DetectPlayerInArea())
         {
             _isMade = true;
-            anim.CrossFade(_animationName, _timeChangeAnimation);
+            //anim.CrossFade(_animationName, _timeChangeAnimation);
             manager?.OnBedMade(this);
+            Debug.Log("Cama Hecha");
         }
 
     }
