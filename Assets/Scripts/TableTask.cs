@@ -3,20 +3,20 @@ using UnityEngine;
 
 [RequireComponent(typeof(Collider2D))]
 [RequireComponent(typeof(SpriteRenderer))]
-public class Beds : MonoBehaviour
+public class TableTask : MonoBehaviour
 {
     [Header("Interacción")]
     public KeyCode interactKey = KeyCode.E;
-    public Collider2D interactTrigger;         // área para detectar al jugador
+    public Collider2D interactTrigger;         
     public LayerMask playerMask;
 
     [Header("Duración del proceso")]
-    public float makeDuration = 1.4f;
+    public float cleanDuration = 1.4f;
 
     [Header("Animación del jugador (opcional)")]
-    public string playerMakeTrigger = "";      // trigger del animator del jugador
+    public string playerCleanTrigger = "";      
 
-    [Header("Humo FX")]
+    [Header("Humo FX (Woo)")]
     public Transform smokeRoot;        
     public float smokeScaleMin = 0.85f;
     public float smokeScaleMax = 1.25f;
@@ -28,14 +28,14 @@ public class Beds : MonoBehaviour
     public AudioSource sfxStart;
     public AudioSource sfxDone;
 
-    [Header("Sprite cama final")]
-    public Sprite sprMadeBed;
+    [Header("Sprite final")]
+    public Sprite sprCleanTable;
 
     [Header("Manager")]
-    public BedsManager manager;
+    public TableManager manager;
 
-    // --- Estado interno ---
-    private bool isMade = false;
+    // --- estado ---
+    private bool isDone = false;
     private bool isBusy = false;
 
     private SpriteRenderer sr;
@@ -56,84 +56,67 @@ public class Beds : MonoBehaviour
 
     void Start()
     {
-        if (manager == null) manager = FindFirstObjectByType<BedsManager>();
-        manager?.RegisterBed(this);
+        if (manager == null) manager = FindFirstObjectByType<TableManager>();
+        manager?.RegisterTable(this);
     }
 
     void Update()
     {
-        if (isMade || isBusy)
+        if (isDone || isBusy)
             return;
 
         Transform p = DetectPlayer();
         if (p == null) return;
 
-        // esperar flanco para iniciar
         if (Input.GetKeyDown(interactKey))
         {
-            StartCoroutine(MakeRoutine(p));
+            StartCoroutine(CleanRoutine(p));
         }
     }
 
-    // =====================================================================
-    //                             RUTINA PRINCIPAL
-    // =====================================================================
-    IEnumerator MakeRoutine(Transform playerT)
+    IEnumerator CleanRoutine(Transform playerT)
     {
         isBusy = true;
 
-        // Bloquear movimiento del jugador
+        // bloquear movimiento del jugador
         PlayerMovement pm = playerT.GetComponent<PlayerMovement>();
         Animator pAnim = playerT.GetComponent<Animator>();
 
         if (pm) pm.enabled = false;
 
-        // Animación del jugador
-        if (pAnim && !string.IsNullOrEmpty(playerMakeTrigger))
-            pAnim.SetTrigger(playerMakeTrigger);
+        if (pAnim && !string.IsNullOrEmpty(playerCleanTrigger))
+            pAnim.SetTrigger(playerCleanTrigger);
 
-        // Sonido inicio
         if (sfxStart) sfxStart.Play();
 
-        // Humo ON
         if (smokeRoot != null)
         {
             smokeRoot.gameObject.SetActive(true);
             StartCoroutine(SmokeRoutine(smokeRoot));
         }
 
-        // Esperar duración
-        float end = Time.time + makeDuration;
+        float end = Time.time + cleanDuration;
         while (Time.time < end)
             yield return null;
 
-        // Humo OFF
         if (smokeRoot != null)
             smokeRoot.gameObject.SetActive(false);
 
-        // Cambiar sprite a cama hecha
-        if (sr && sprMadeBed)
-            sr.sprite = sprMadeBed;
+        if (sr && sprCleanTable)
+            sr.sprite = sprCleanTable;
 
-        // Marcar completada
-        isMade = true;
-        manager?.OnBedMade(this);
+        isDone = true;
+        manager?.OnTableCleaned(this);
 
-        // Sonido fin
         if (sfxDone) sfxDone.Play();
 
-        // Desbloquear jugador
         if (pm) pm.enabled = true;
 
-        // Deshabilitar interacción para siempre
         if (interactTrigger) interactTrigger.enabled = false;
 
         isBusy = false;
     }
 
-    // =====================================================================
-    //                           DETECCIÓN DE JUGADOR
-    // =====================================================================
     Transform DetectPlayer()
     {
         if (!interactTrigger) return null;
@@ -151,6 +134,7 @@ public class Beds : MonoBehaviour
         for (int i = 0; i < count; i++)
         {
             if (hits[i] == null) continue;
+
             PlayerGrab pg = hits[i].GetComponent<PlayerGrab>();
             if (pg != null)
                 return pg.transform;
@@ -159,16 +143,12 @@ public class Beds : MonoBehaviour
         return null;
     }
 
-    // =====================================================================
-    //                         FX HUMO (Woo)
-    // =====================================================================
     IEnumerator SmokeRoutine(Transform t)
     {
         float snapTimer = 0f;
 
         while (t.gameObject.activeSelf)
         {
-            // Pulso de escala
             float s = Mathf.Lerp(
                 smokeScaleMin, 
                 smokeScaleMax, 
@@ -176,8 +156,8 @@ public class Beds : MonoBehaviour
             );
             t.localScale = new Vector3(s, s, 1f);
 
-            // Rotaciones bruscas
             snapTimer -= Time.deltaTime;
+
             if (snapTimer <= 0f)
             {
                 float ang = Random.Range(smokeSnapAngles.x, smokeSnapAngles.y);
@@ -189,14 +169,14 @@ public class Beds : MonoBehaviour
         }
     }
 
-    public bool IsMade => isMade;
+    public bool IsDone => isDone;
     public bool IsBusy => isBusy;
 
 #if UNITY_EDITOR
     void OnDrawGizmosSelected()
     {
         if (interactTrigger == null) return;
-        Gizmos.color = Color.cyan;
+        Gizmos.color = Color.magenta;
         var b = interactTrigger.bounds;
         Gizmos.DrawWireCube(b.center, b.size);
     }
