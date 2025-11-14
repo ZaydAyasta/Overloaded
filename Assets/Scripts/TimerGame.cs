@@ -35,9 +35,7 @@ public class TimerGame : MonoBehaviour
         if (remaining <= 0f)
         {
             isRunning = false;
-            GameObject g = Instantiate(_prefab);
-
-            g.GetComponent<Pantalla>().lose();
+            GameEnd.Instance.Lose();
         }
             
 
