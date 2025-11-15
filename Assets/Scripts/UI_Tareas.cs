@@ -139,24 +139,16 @@ public class UI_Tareas : MonoBehaviour
 
     private void CheckWinCondition()
     {
-        
+        if (GameEnd.Instance.HasEnded)
+            return; // ya se mostró win o lose
+
         foreach (var tog in toggles)
         {
             if (!tog.isOn)
-                return; // Todav�a falta una tarea
+                return; // todavía falta una tarea
         }
 
-
-        GameObject g =Instantiate(_prefab);
-
-       
-
-
-        g.GetComponent<Pantalla>().win();
-
-        
-
-
+        GameEnd.Instance.Win();
     }
 
 
