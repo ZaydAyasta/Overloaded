@@ -13,22 +13,35 @@ public class BroomBehaviour : GrabbableBehaviour
     [Tooltip("Fuerza de limpieza por segundo aplicada a los polvos dentro del área.")]
     public float sweepStrengthPerSecond = 1.2f;
 
+    [Header("FX de polvo")]
+    [SerializeField] private ParticleSystem polvoParticle;
+
+    [Header("Audio")]
+    [Tooltip("Sonido de barrer (loop mientras se está barriendo).")]
+    public AudioSource sweepAudio;
+    [Range(0f, 1f)]
+    public float sweepAudioVolume = 1f;     // AUDIO
+
     private float angle = 0f;
     private float tOsc = 0f;
     private Transform self;
 
-    [SerializeField]private ParticleSystem polvoParticle;
     private bool polvoDentro = false;
     Transform _particlePolvo;
-
 
     void Awake()
     {
         self = transform;
         if (sweepAreaTrigger != null) sweepAreaTrigger.isTrigger = true;
 
-        
-       if(polvoParticle != null) _particlePolvo = polvoParticle.transform;
+        if (polvoParticle != null) _particlePolvo = polvoParticle.transform;
+
+        // AUDIO: configurar volumen y loop (opcional)
+        if (sweepAudio != null)
+        {
+            sweepAudio.loop = true;
+            sweepAudio.volume = sweepAudioVolume;
+        }
     }
 
     public override void OnPickedUp(PlayerGrab player)
@@ -36,6 +49,10 @@ public class BroomBehaviour : GrabbableBehaviour
         // opcional: reset visual
         self.localRotation = Quaternion.identity;
         SetSweepAreaActive(false);
+
+        // AUDIO: por si estaba sonando en el suelo
+        if (sweepAudio != null && sweepAudio.isPlaying)
+            sweepAudio.Stop();
     }
 
     public override void OnDropped(PlayerGrab player)
@@ -43,6 +60,10 @@ public class BroomBehaviour : GrabbableBehaviour
         // vuelve neutro
         self.localRotation = Quaternion.identity;
         SetSweepAreaActive(false);
+
+        // AUDIO
+        if (sweepAudio != null && sweepAudio.isPlaying)
+            sweepAudio.Stop();
     }
 
     public override void OnCarriedUpdate(PlayerGrab player, Vector2 moveInput)
@@ -69,16 +90,21 @@ public class BroomBehaviour : GrabbableBehaviour
         {
             polvoDentro = false;
             SafeParticle(p => { p.Stop(); });
-            return; 
+
+            // AUDIO: si no se mueve, parar sonido
+            if (sweepAudio != null && sweepAudio.isPlaying)
+                sweepAudio.Stop();
+
+            return;
         }
 
         // Aplica limpieza a todos los polvos que toquen el área
-        // Usamos OverlapCollider sobre el trigger para recoger polvos cercanos
         var filter = new ContactFilter2D { useTriggers = true, useLayerMask = false };
         Collider2D[] hits = new Collider2D[16];
         int count = sweepAreaTrigger.Overlap(filter, hits);
         float amount = sweepStrengthPerSecond * Time.deltaTime;
         polvoDentro = false;
+
         for (int i = 0; i < count; i++)
         {
             var h = hits[i];
@@ -86,22 +112,33 @@ public class BroomBehaviour : GrabbableBehaviour
 
             // si el collider pertenece a un Polvo
             var p = h.GetComponent<Polvo>();
-           
             if (p == null) p = h.GetComponentInParent<Polvo>();
-            if (p != null) { 
-                p.ApplySweep(amount); 
-                polvoDentro = true;
-                if (polvoParticle != null) _particlePolvo.position = h.transform.position;
 
+            if (p != null)
+            {
+                p.ApplySweep(amount);
+                polvoDentro = true;
+
+                if (polvoParticle != null)
+                    _particlePolvo.position = h.transform.position;
             }
         }
+
         if (polvoDentro)
         {
             SafeParticle(p => { if (!p.isPlaying) p.Play(); });
+
+            // AUDIO: si está barriendo polvo, asegurar que suene
+            if (sweepAudio != null && !sweepAudio.isPlaying)
+                sweepAudio.Play();
         }
         else
         {
             SafeParticle(p => { if (p.isPlaying) p.Stop(); });
+
+            // AUDIO: sin polvo, parar sonido
+            if (sweepAudio != null && sweepAudio.isPlaying)
+                sweepAudio.Stop();
         }
     }
 
@@ -109,8 +146,6 @@ public class BroomBehaviour : GrabbableBehaviour
     {
         if (sweepAreaTrigger == null) return;
         sweepAreaTrigger.enabled = active;
-
- 
     }
 
     void SafeParticle(System.Action<ParticleSystem> action)
@@ -118,5 +153,4 @@ public class BroomBehaviour : GrabbableBehaviour
         if (polvoParticle == null || polvoParticle.Equals(null)) return;
         action(polvoParticle);
     }
-
 }

@@ -12,6 +12,10 @@ public class Plant : MonoBehaviour
     public Animator anim;                         // Asignado en Inspector
     public string completedParam = "Completed";   // Bool en el Animator
 
+    [Header("Sprites")]
+    public Sprite sprNormal;      // sprite de planta antes de regar
+    public Sprite sprCompleted;   // sprite de planta ya regada / crecida
+
     [Header("Feedback")]
     public float flashDuration = 0.2f;            // Parpadeo blanco rápido al terminar
 
@@ -34,6 +38,10 @@ public class Plant : MonoBehaviour
         originalColor = sr.color;
 
         if (anim == null) anim = GetComponent<Animator>();
+
+        // Sprite inicial de la planta
+        if (sprNormal != null)
+            sr.sprite = sprNormal;
     }
 
     void Start()
@@ -52,11 +60,18 @@ public class Plant : MonoBehaviour
         {
             completed = true;
 
+            // Cambiar sprite a planta terminada
+            if (sr != null && sprCompleted != null)
+                sr.sprite = sprCompleted;
+
+            // Animación
             if (anim != null)
                 anim.SetBool(completedParam, true);
 
+            // Efecto de parpadeo
             StartCoroutine(FlashWhite());
 
+            // Avisar al manager
             manager?.OnPlantCompleted(this);
         }
     }

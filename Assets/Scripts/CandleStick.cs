@@ -8,9 +8,9 @@ public class Candlestick : MonoBehaviour
     public bool startLit = false;
 
     [Header("Animator")]
-    public Animator anim;                  // asignar en inspector
-    public string litParam = "Lit";        // BOOL
-    public string flashTrigger = "Flash"; 
+    public Animator anim;
+    public string litParam = "Lit";
+    public string flashTrigger = "Flash";
     public bool useFlashTrigger = false;
 
     [Header("Flash visual")]
@@ -21,6 +21,12 @@ public class Candlestick : MonoBehaviour
 
     [Header("Manager")]
     public CandleManager manager;
+
+    [Header("Sonido (opcional)")]
+    public AudioSource audioSource;    // arrastra uno aquí
+    public AudioClip lightSound;       // sonido al encender
+    [Range(0f, 1f)]
+    public float soundVolume = 1f;
 
     [Header("Debug")]
     public bool debugLogs = false;
@@ -35,20 +41,21 @@ public class Candlestick : MonoBehaviour
 
     void Awake()
     {
-        // sprite
         sr = GetComponent<SpriteRenderer>() ?? GetComponentInChildren<SpriteRenderer>(true);
 
-        // animator
         if (anim == null)
             anim = GetComponent<Animator>() ?? GetComponentInChildren<Animator>(true);
 
         if (sr != null)
             originalColor = sr.color;
+
+        // Asignar automáticamente AudioSource si no está puesto
+        if (audioSource == null)
+            audioSource = GetComponent<AudioSource>();
     }
 
     void Start()
     {
-        // autowire manager
 #if UNITY_2023_1_OR_NEWER
         if (manager == null) manager = FindFirstObjectByType<CandleManager>(FindObjectsInactive.Include);
 #else
@@ -56,7 +63,6 @@ public class Candlestick : MonoBehaviour
 #endif
         manager?.RegisterCandlestick(this);
 
-        // estado inicial sin notificar
         SetLit(startLit, false);
     }
 
@@ -65,14 +71,24 @@ public class Candlestick : MonoBehaviour
 
     public void LightUp()
     {
-        if (IsLit) { TriggerFlash(); return; }
+        if (IsLit)
+        {
+            TriggerFlash();
+            return;
+        }
+
         SetLit(true);
+        PlayLightSound();   // <<< 🎵 Sonido
         TriggerFlash();
     }
 
     public void Toggle()
     {
         SetLit(!IsLit);
+
+        if (IsLit)
+            PlayLightSound();  // <<< 🎵 Sonido sólo al encender
+
         TriggerFlash();
     }
 
@@ -80,7 +96,6 @@ public class Candlestick : MonoBehaviour
     {
         IsLit = value;
 
-        // cambiar anim
         if (anim != null)
         {
             foreach (var p in anim.parameters)
@@ -91,11 +106,10 @@ public class Candlestick : MonoBehaviour
                 }
         }
 
-        // manager
         if (notifyManager && manager != null)
         {
             if (value) manager.OnCandlestickLit(this);
-            else       manager.OnCandlestickUnlit(this);
+            else manager.OnCandlestickUnlit(this);
         }
     }
 
@@ -103,7 +117,6 @@ public class Candlestick : MonoBehaviour
     {
         if (Time.unscaledTime < nextFlashTime) return;
 
-        // anim trigger
         if (useFlashTrigger && anim != null)
         {
             foreach (var p in anim.parameters)
@@ -111,11 +124,18 @@ public class Candlestick : MonoBehaviour
                     anim.SetTrigger(flashTrigger);
         }
 
-        // color flash
         if (flashCo != null) StopCoroutine(flashCo);
         flashCo = StartCoroutine(FlashRoutine());
 
         nextFlashTime = Time.unscaledTime + flashCooldown;
+    }
+
+    void PlayLightSound()
+    {
+        if (audioSource != null && lightSound != null)
+        {
+            audioSource.PlayOneShot(lightSound, soundVolume);
+        }
     }
 
     IEnumerator FlashRoutine()
@@ -136,6 +156,7 @@ public class Candlestick : MonoBehaviour
                 sr.color = Color.Lerp(flashColor, originalColor, t / returnBlend);
                 yield return null;
             }
+
             sr.color = originalColor;
         }
 
