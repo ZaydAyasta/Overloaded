@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using System.Collections;
@@ -6,60 +6,113 @@ using TMPro;
 
 public class ComicIntro : MonoBehaviour
 {
-    public RectTransform comicImage;        // Imagen gigante del comic
-    public CanvasGroup cg;                  // Para fades del panel
-    public float fadeTime = 0.4f;
+    [Header("Comic")]
+    public RectTransform comicImage;
+    public CanvasGroup comicCg;
+    public float moveTime = 0.4f;
 
+    [Header("Menu")]
+    public CanvasGroup menuCg;
+    public float menuFadeTime = 0.5f;
+
+    [Header("Comic Positions")]
     public Vector2 topLeft;
     public Vector2 topRight;
     public Vector2 bottomLeft;
     public Vector2 bottomRight;
 
-    public TextMeshProUGUI pressToPlayText;  // TEXTO TMP
+    [Header("UI")]
+    public TextMeshProUGUI pressToPlayText;
+
+    [Header("Next")]
     public string nextScene = "Fusion";
 
     int index = 0;
     bool isMoving = false;
     bool ending = false;
+    bool menuFinished = false;
 
     Vector2[] positions;
 
     void Start()
     {
-        positions = new Vector2[] {
-            topLeft,
-            topRight,
-            bottomLeft,
-            bottomRight
-        };
+        positions = new[] { topLeft, topRight, bottomLeft, bottomRight };
 
-        // Desactivar texto inicial
+        comicCg.alpha = 0.5f;
         pressToPlayText.gameObject.SetActive(false);
+        comicImage.anchoredPosition = positions[0];
 
-        cg.alpha = 1f;
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
 
-        comicImage.anchoredPosition = positions[0];
+        Debug.Log("[ComicIntro] Start listo. Menú visible.");
     }
 
     void Update()
     {
-        if (isMoving) return;
+        if (!Input.GetKeyDown(KeyCode.Return))
+            return;
 
-        if (Input.GetKeyDown(KeyCode.Return))
+        // PRIMER ENTER — OCULTAR MENÚ
+        if (!menuFinished)
         {
-            if (ending)
-            {
-                SceneManager.LoadScene(nextScene);
-                return;
-            }
-
-            NextStep();
+            Debug.Log("[ComicIntro] ENTER → OCULTAR MENÚ");
+            StartCoroutine(FadeOutMenu());
+            return;
         }
+
+        // ENTERS DURANTE EL CÓMIC
+        if (!ending)
+        {
+            Debug.Log("[ComicIntro] ENTER → AVANZAR COMIC (" + index + ")");
+            NextComicStep();
+            return;
+        }
+
+        // ENTER FINAL → CAMBIAR ESCENA
+        Debug.Log("[ComicIntro] ENTER FINAL → LOAD SCENE");
+        SceneManager.LoadScene(nextScene);
     }
 
-    void NextStep()
+    // FADE DEL MENÚ
+    IEnumerator FadeOutMenu()
+    {
+        float t = 0f;
+        float start = menuCg.alpha;
+
+        while (t < menuFadeTime)
+        {
+            t += Time.deltaTime;
+            menuCg.alpha = Mathf.Lerp(start, 0f, t / menuFadeTime);
+            yield return null;
+        }
+
+        menuCg.alpha = 0f;
+        menuCg.gameObject.SetActive(false);
+
+        StartCoroutine(FadeInComic());
+    }
+
+    IEnumerator FadeInComic()
+    {
+        float t = 0f;
+        float duration = 0.6f;
+
+        while (t < duration)
+        {
+            t += Time.deltaTime;
+            comicCg.alpha = Mathf.Lerp(0, 1, t / duration);
+            yield return null;
+        }
+
+        comicCg.alpha = 1f;
+        menuFinished = true;
+
+        Debug.Log("[ComicIntro] Comic visible. Puedes avanzar con Enter.");
+    }
+
+    // --- LOGICA DEL COMIC ---
+    void NextComicStep()
     {
         index++;
 
@@ -69,9 +122,12 @@ public class ComicIntro : MonoBehaviour
         }
         else
         {
+            // YA NO HAY MÁS COMICS — MOSTRAR PRESS TO PLAY
             pressToPlayText.gameObject.SetActive(true);
             StartCoroutine(FadeInTMP());
             ending = true;
+
+            Debug.Log("[ComicIntro] Final del comic. Mostrar mensaje de continuar.");
         }
     }
 
@@ -82,10 +138,10 @@ public class ComicIntro : MonoBehaviour
         Vector2 start = comicImage.anchoredPosition;
         float t = 0f;
 
-        while (t < fadeTime)
+        while (t < moveTime)
         {
             t += Time.deltaTime;
-            comicImage.anchoredPosition = Vector2.Lerp(start, target, t / fadeTime);
+            comicImage.anchoredPosition = Vector2.Lerp(start, target, t / moveTime);
             yield return null;
         }
 
